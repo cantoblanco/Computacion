@@ -19,7 +19,58 @@ class TranslatorApp(QMainWindow):
         self.target_language = 'English'  # Idioma por defecto al que traducir
         self.initAzureClient()
         self.initUI()
-
+        self.applyStyles()
+        
+    def applyStyles(self):
+        # Global style
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #f0f0f0;
+            }
+            QLabel {
+                font-size: 14px;
+                color: #333;
+            }
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border-radius: 5px;
+                padding: 10px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+            QTextEdit {
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                padding: 5px;
+            }
+            QComboBox {
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                padding: 5px;
+                background-color: white;
+            }
+            QTabWidget::pane { /* The tab widget frame */
+                border-top: 2px solid #ccc;
+            }
+            
+            QTabBar::tab {
+                background: #eee;
+                border: 1px solid #ccc;
+                border-bottom-color: #f0f0f0; /* same as pane color */
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+                padding: 10px;
+            }
+            
+            QTabBar::tab:selected, QTabBar::tab:hover {
+                background: white;
+            }
+            
+        """)
+        
     def initUI(self):
         self.tabs = QTabWidget()
         self.tab1 = QWidget()
@@ -110,10 +161,10 @@ class TranslatorApp(QMainWindow):
                     presence_penalty=0,
                     stop=None
                 )
-                # Get translated text
+                # Obtener texto traducido
                 translated_text = response.choices[0].message.content if response.choices else "Translation failed."
 
-                # Save translated text to new Word document
+                # Guardar el texto traducido en un nuevo documento de Word
                 translated_document = Document()
                 translated_document.add_paragraph(translated_text)
                 new_file_path = os.path.splitext(filePath)[0] + "_translated.docx"
@@ -128,7 +179,7 @@ class TranslatorApp(QMainWindow):
 
     def initAzureClient(self):
         self.client = AzureOpenAI(
-            azure_endpoint="https://name.openai.azure.com/",  # Azure OpenAI endpoint
+            azure_endpoint="https://trans-gpt-35.openai.azure.com/",  # Azure OpenAI endpoint
             api_key="",  # Azure OpenAI API key
             api_version="2024-02-15-preview"  # API version
         )
@@ -148,8 +199,9 @@ class TranslatorApp(QMainWindow):
         print(message_text)
 
         try:
+            # Enviar solicitud de traducción
             response = self.client.chat.completions.create(
-                model="trans", # Adjust deployment name
+                model="trans-gpt-35", # Adjust deployment name
                 messages=message_text,
                 temperature=0.7, #
                 max_tokens=800,
@@ -158,6 +210,7 @@ class TranslatorApp(QMainWindow):
                 presence_penalty=0,
                 stop=None
             )
+            # Obtener texto traducido
             translated_text = response.choices[0].message.content if response.choices else "Translation failed."
             self.outputText.setText(translated_text)
             print("Traducción completada.")
